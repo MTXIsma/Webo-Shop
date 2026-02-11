@@ -8,24 +8,28 @@
 </head>
 <body>
 <h1>🛒 WeBo Shop</h1>
+<a href="cart.html">Voir Panier</a>
 <div id="productList"></div>
 
 <script type="module">
 import { products } from './js/products.js';
+import { addToCart } from './js/cart.js';
+
 const container = document.getElementById("productList");
 products.forEach(p=>{
   container.innerHTML += `
-  <div class="product">
-    <img src="${p.img}" width="200" alt="${p.name}">
-    <h3>${p.name}</h3>
-    <p>Prix: ${p.price}€</p>
-    <p>Payement: ${p.payment}</p>
-    <p>Stock: ${p.stock}</p>
-    <button onclick="alert('Acheter ${p.name} via PayPal ou Crypto')">Acheter</button>
-  </div>
+    <div class="product">
+      <img src="${p.img}" width="200">
+      <h3>${p.name}</h3>
+      <p>Prix: ${p.price}€</p>
+      <p>Stock: ${p.stock}</p>
+      <a href="product.html?id=${p.id}">Voir Produit</a>
+      <button onclick="addToCart(${p.id})">Ajouter au panier</button>
+    </div>
   `;
 });
 </script>
 </body>
 </html>
+
 
