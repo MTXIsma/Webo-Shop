@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeBo Shop</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<h1>🛒 WeBo Shop</h1>
+<div id="productList"></div>
+
+<script type="module">
+import { products } from './js/products.js';
+const container = document.getElementById("productList");
+products.forEach(p=>{
+  container.innerHTML += `
+  <div class="product">
+    <img src="${p.img}" width="200" alt="${p.name}">
+    <h3>${p.name}</h3>
+    <p>Prix: ${p.price}€</p>
+    <p>Payement: ${p.payment}</p>
+    <p>Stock: ${p.stock}</p>
+    <button onclick="alert('Acheter ${p.name} via PayPal ou Crypto')">Acheter</button>
+  </div>
+  `;
+});
+</script>
+</body>
+</html>
+
