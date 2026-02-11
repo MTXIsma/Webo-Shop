@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panier</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<h1>Votre Panier</h1>
+<a href="index.html">Retour aux produits</a>
+<div id="cartList"></div>
+<button id="checkoutPaypal">Payer PayPal</button>
+<button id="checkoutCrypto">Payer Crypto</button>
+
+<script type="module">
+import { getCart, clearCart } from './js/cart.js';
+import { products } from './js/products.js';
+
+const cart = getCart();
+const container = document.getElementById("cartList");
+let total = 0;
+
+cart.forEach(item=>{
+  const p = products.find(prod=>prod.id===item.id);
+  container.innerHTML += `<p>${p.name} x${item.qty} - ${p.price*item.qty}€</p>`;
+  total += p.price*item.qty;
+});
+
+container.innerHTML += `<p><b>Total: ${total.toFixed(2)}€</b></p>`;
+
+document.getElementById("checkoutPaypal").onclick = ()=>{
+  if(total===0){alert("Votre panier est vide !"); return;}
+  alert(`Redirection vers PayPal sandbox pour payer ${total.toFixed(2)}€ (Test)`);
+  clearCart();
+  window.location.reload();
+};
+
+document.getElementById("checkoutCrypto").onclick = ()=>{
+  if(total===0){alert("Votre panier est vide !"); return;}
+  alert(`Redirection vers Crypto pour payer ${total.toFixed(2)}€ (Simulé)`);
+  clearCart();
+  window.location.reload();
+};
+</script>
+</body>
+</html>
