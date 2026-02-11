@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produit</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a href="index.html">Retour</a> | <a href="cart.html">Voir Panier</a>
+<div id="product"></div>
+
+<script type="module">
+import { products } from './js/products.js';
+import { addToCart } from './js/cart.js';
+
+const params = new URLSearchParams(window.location.search);
+const id = parseInt(params.get("id"));
+const p = products.find(prod=>prod.id===id);
+const container = document.getElementById("product");
+
+container.innerHTML = `
+  <div class="product">
+    <img src="${p.img}" width="300">
+    <h2>${p.name}</h2>
+    <p>Prix: ${p.price}€</p>
+    <p>Stock: ${p.stock}</p>
+    <p>Méthode de paiement: ${p.payment}</p>
+    <button onclick="addToCart(${p.id})">Ajouter au panier</button>
+  </div>
+`;
+</script>
+</body>
+</html>
