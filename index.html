@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WeBo Shop</title>
+
 <style>
 body{font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0}
 header{background:#232f3e;color:white;padding:15px;text-align:center;font-size:24px}
@@ -16,31 +17,35 @@ button:hover{background:#f7ca00}
 #cartContainer{position:fixed;top:60px;right:20px;background:white;padding:15px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.3);width:300px;max-height:80vh;overflow:auto;display:none;z-index:10}
 #cartContainer h3{margin-top:0;text-align:center}
 #cartContainer p{margin:5px 0}
-#cartContainer button{width:100%;margin-top:10px}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;z-index:20}
 .modal-content{background:white;padding:20px;border-radius:10px;width:90%;max-width:500px;text-align:center}
 .modal-content img{width:300px;height:300px;object-fit:cover;border-radius:5px}
-.modal-content button{margin-top:10px}
 </style>
+
+<!-- SDK PAYPAL -->
+<script src="https://www.paypal.com/sdk/js?client-id=TON_CLIENT_ID_ICI&currency=EUR"></script>
+
 </head>
 <body>
 
 <header>🛒 WeBo Shop</header>
 
 <button onclick="toggleCart()" style="position:fixed;top:15px;right:20px;padding:10px 15px;">Voir Panier</button>
+
 <div id="cartContainer">
 <h3>Panier</h3>
 <div id="cartList"></div>
-<p><b>Total: <span id="cartTotal">0</span>€</b></p>
-<button onclick="payPayPal()">Payer via PayPal</button>
-<button onclick="payCrypto()">Payer via Crypto / LTC</button>
+<p><b>Total: <span id="cartTotal">0.00</span>€</b></p>
+
+<div id="paypal-button-container"></div>
+
 <button onclick="clearCartUI()">Vider Panier</button>
 </div>
 
 <div class="container" id="productList"></div>
 
 <div class="modal" id="productModal">
-<div class="modal-content" id="modalContent">
+<div class="modal-content">
 <h2 id="modalName"></h2>
 <img id="modalImg" src="">
 <p id="modalPrice"></p>
@@ -52,53 +57,37 @@ button:hover{background:#f7ca00}
 </div>
 
 <script>
-// -- PRODUITS
+
+// PRODUITS (Ketupat supprimé + Swaggy Bros ajouté)
+
 const products = [
-{id:1,name:"Eviledon 157m",price:1.50,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Eviledon+157m"},
-{id:2,name:"Eviledon 189m",price:1.50,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Eviledon+189m"},
-{id:3,name:"Orcaledon 40m",price:1.50,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Orcaledon+40m"},
-{id:4,name:"Nuclearo Radio",price:4,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Nuclearo+Radio"},
-{id:5,name:"Nuclearo Rnbw",price:4,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Nuclearo+Rnbw"},
-{id:6,name:"Nuclearo YingYang",price:4,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Nuclearo+YingYang"},
-{id:7,name:"Nuclearo Lava",price:4,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Nuclearo+Lava"},
-{id:8,name:"Nuclearo Skibidi",price:4,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Nuclearo+Skibidi"},
-{id:9,name:"Ginger Sekolah 75m",price:2,payment:"PayPal / LTC",stock:2,img:"https://via.placeholder.com/200?text=Ginger+Sekolah"},
-{id:10,name:"Mariachi Rnbw 125m",price:3,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Mariachi+Rnbw"},
-{id:11,name:"Tacorita 107m",price:4,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Tacorita"},
-{id:12,name:"Baccuru 576m",price:3.50,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Baccuru"},
-{id:13,name:"Rosetti Toiletti 300m",price:2.50,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Rosetti+Toiletti"},
-{id:14,name:"Spaghetti Toiletti 615m",price:4,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Spaghetti+Toiletti"},
-{id:15,name:"Money Puggy 126m",price:2,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Money+Puggy+126"},
-{id:16,name:"Money Puggy 273m",price:3,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Money+Puggy+273"},
-{id:17,name:"Ketupat 43m",price:2.50,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Ketupat"},
-{id:18,name:"Garama 50m",price:5,payment:"PayPal / LTC",stock:2,img:"https://via.placeholder.com/200?text=Garama+50"},
-{id:19,name:"Garama 237m",price:10,payment:"PayPal / LTC",stock:1,img:"https://via.placeholder.com/200?text=Garama+237"},
-// ROBUX
-{id:20,name:"100 Robux",price:0.70,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=100+Robux"},
-{id:21,name:"500 Robux",price:3.50,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=500+Robux"},
-{id:22,name:"1000 Robux",price:6.20,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=1000+Robux"},
-{id:23,name:"2000 Robux",price:12,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=2000+Robux"},
-{id:24,name:"5000 Robux",price:30,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=5000+Robux"},
-{id:25,name:"10.000 Robux",price:60,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=10000+Robux"},
-{id:26,name:"Carte Robux 40€",price:30,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=Carte+Robux+40"},
-{id:27,name:"Admin Panel",price:70,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=Admin+Panel"},
-{id:28,name:"Slap 199 Robux",price:1,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=Slap+199+Robux"},
-{id:29,name:"Base Saint-Valentain",price:5.50,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=Base+Saint-Valentain"},
-{id:30,name:"Marteau",price:7,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=Marteau"},
-{id:31,name:"Tapis",price:3,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=Tapis"},
-{id:32,name:"VIP",price:3,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=VIP"},
-{id:33,name:"X2 Argent",price:2,payment:"PayPal / LTC / Brainrot",stock:1,img:"https://via.placeholder.com/200?text=X2+Argent"}
+{id:1,name:"Eviledon 157m",price:1.50,stock:1,img:"https://via.placeholder.com/200?text=Eviledon+157m"},
+{id:2,name:"Eviledon 189m",price:1.50,stock:1,img:"https://via.placeholder.com/200?text=Eviledon+189m"},
+{id:3,name:"Orcaledon 40m",price:1.50,stock:1,img:"https://via.placeholder.com/200?text=Orcaledon+40m"},
+{id:4,name:"Nuclearo Radio",price:4,stock:1,img:"https://via.placeholder.com/200?text=Nuclearo+Radio"},
+{id:5,name:"Nuclearo Rnbw",price:4,stock:1,img:"https://via.placeholder.com/200?text=Nuclearo+Rnbw"},
+{id:6,name:"Nuclearo YingYang",price:4,stock:1,img:"https://via.placeholder.com/200?text=Nuclearo+YingYang"},
+{id:7,name:"Nuclearo Lava",price:4,stock:1,img:"https://via.placeholder.com/200?text=Nuclearo+Lava"},
+{id:8,name:"Nuclearo Skibidi",price:4,stock:1,img:"https://via.placeholder.com/200?text=Nuclearo+Skibidi"},
+{id:9,name:"Ginger Sekolah 75m",price:2,stock:2,img:"https://via.placeholder.com/200?text=Ginger+Sekolah"},
+{id:10,name:"Mariachi Rnbw 125m",price:3,stock:1,img:"https://via.placeholder.com/200?text=Mariachi+Rnbw"},
+{id:11,name:"Tacorita 107m",price:4,stock:1,img:"https://via.placeholder.com/200?text=Tacorita"},
+{id:12,name:"Baccuru 576m",price:3.50,stock:1,img:"https://via.placeholder.com/200?text=Baccuru"},
+{id:13,name:"Rosetti Toiletti 300m",price:2.50,stock:1,img:"https://via.placeholder.com/200?text=Rosetti+Toiletti"},
+{id:14,name:"Spaghetti Toiletti 615m",price:4,stock:1,img:"https://via.placeholder.com/200?text=Spaghetti+Toiletti"},
+{id:15,name:"Money Puggy 126m",price:2,stock:1,img:"https://via.placeholder.com/200?text=Money+Puggy+126"},
+{id:16,name:"Money Puggy 273m",price:3,stock:1,img:"https://via.placeholder.com/200?text=Money+Puggy+273"},
+{id:17,name:"Swaggy Bros 600m",price:6,stock:1,img:"https://via.placeholder.com/200?text=Swaggy+Bros+600m"}
 ];
 
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-let currentModalId = null;
+let cart = [];
 
-// -- Afficher produits
 const productList = document.getElementById("productList");
+
 products.forEach(p=>{
   const div = document.createElement("div");
-  div.className = "product";
-  div.innerHTML = `
+  div.className="product";
+  div.innerHTML=`
     <img src="${p.img}">
     <h3>${p.name}</h3>
     <p>${p.price}€</p>
@@ -108,77 +97,73 @@ products.forEach(p=>{
   productList.appendChild(div);
 });
 
-// --- PANIER ---
 function toggleCart(){
-  const cartDiv = document.getElementById("cartContainer");
-  cartDiv.style.display = cartDiv.style.display === "none" ? "block" : "none";
+  const cartDiv=document.getElementById("cartContainer");
+  cartDiv.style.display = cartDiv.style.display==="none"?"block":"none";
   updateCart();
 }
 
-function addToCart(productId){
-  const item = cart.find(c=>c.id===productId);
-  if(item){ item.qty++; } else { cart.push({id:productId, qty:1}); }
-  localStorage.setItem("cart",JSON.stringify(cart));
+function openModal(id){
+  const p=products.find(prod=>prod.id===id);
+  document.getElementById("modalName").innerText=p.name;
+  document.getElementById("modalImg").src=p.img;
+  document.getElementById("modalPrice").innerText="Prix: "+p.price+"€";
+  document.getElementById("modalStock").innerText="Stock: "+p.stock;
+  document.getElementById("modalPayment").innerText="Paiement: PayPal";
+  document.getElementById("productModal").style.display="flex";
+  window.currentModalId=id;
+}
+
+function closeModal(){document.getElementById("productModal").style.display="none";}
+
+function addToCartModal(){
+  const id=window.currentModalId;
+  const item=cart.find(c=>c.id===id);
+  if(item){item.qty++;}else{cart.push({id:id,qty:1});}
   updateCart();
-  alert("Produit ajouté au panier !");
+  closeModal();
 }
 
 function updateCart(){
-  const list = document.getElementById("cartList");
-  const totalEl = document.getElementById("cartTotal");
-  list.innerHTML = "";
-  let total = 0;
+  const list=document.getElementById("cartList");
+  const totalEl=document.getElementById("cartTotal");
+  list.innerHTML="";
+  let total=0;
   cart.forEach(item=>{
-    const p = products.find(prod=>prod.id===item.id);
-    list.innerHTML += `<p>${p.name} x${item.qty} - ${(p.price*item.qty).toFixed(2)}€</p>`;
-    total += p.price*item.qty;
+    const p=products.find(prod=>prod.id===item.id);
+    list.innerHTML+=`<p>${p.name} x${item.qty} - ${(p.price*item.qty).toFixed(2)}€</p>`;
+    total+=p.price*item.qty;
   });
-  totalEl.innerText = total.toFixed(2);
+  totalEl.innerText=total.toFixed(2);
 }
 
 function clearCartUI(){
   cart=[];
-  localStorage.setItem("cart",JSON.stringify(cart));
   updateCart();
 }
 
-// --- MODAL PRODUIT ---
-function openModal(id){
-  currentModalId = id;
-  const p = products.find(prod=>prod.id===id);
-  document.getElementById("modalName").innerText = p.name;
-  document.getElementById("modalImg").src = p.img;
-  document.getElementById("modalPrice").innerText = "Prix: "+p.price+"€";
-  document.getElementById("modalStock").innerText = "Stock: "+p.stock;
-  document.getElementById("modalPayment").innerText = "Paiement: "+p.payment;
-  document.getElementById("productModal").style.display="flex";
-}
+paypal.Buttons({
+  createOrder:function(data,actions){
+    let total=0;
+    cart.forEach(item=>{
+      const p=products.find(prod=>prod.id===item.id);
+      total+=p.price*item.qty;
+    });
+    if(total<=0){alert("Panier vide !");return;}
+    return actions.order.create({
+      purchase_units:[{
+        amount:{value:total.toFixed(2)}
+      }]
+    });
+  },
+  onApprove:function(data,actions){
+    return actions.order.capture().then(function(details){
+      alert("Paiement réussi ! Merci "+details.payer.name.given_name);
+      clearCartUI();
+    });
+  }
+}).render('#paypal-button-container');
 
-function closeModal(){ document.getElementById("productModal").style.display="none"; }
-
-function addToCartModal(){ addToCart(currentModalId); closeModal(); }
-
-// --- PAYER PAYPAL ---
-function payPayPal(){
-  if(cart.length===0){ alert("Panier vide !"); return; }
-  let total=0;
-  cart.forEach(item=>{ const p=products.find(prod=>prod.id===item.id); total+=p.price*item.qty; });
-  alert(`Vous allez payer ${total.toFixed(2)}€ sur PayPal !`);
-  window.open("https://paypal.me/Isma016", "_blank");
-  clearCartUI();
-}
-
-// --- CRYPTO SIMULÉ ---
-function payCrypto(){
-  if(cart.length===0){alert("Votre panier est vide !"); return;}
-  let total=0;
-  cart.forEach(item=>{ const p=products.find(prod=>prod.id===item.id); total+=p.price*item.qty; });
-  alert(`Redirection vers Crypto / LTC pour payer ${total.toFixed(2)}€ (simulé)`);
-  clearCartUI();
-}
-
-// --- INIT ---
-updateCart();
 </script>
 
 </body>
